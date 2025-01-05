@@ -39,18 +39,7 @@ resource "aws_instance" "web" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.micro"
   vpc_security_group_ids = [aws_security_group.web.id]
-  user_data = <<EOF
-#!/bin/bash
-apt update -y
-apt install apache2 -y
-
-MYIP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-
-echo "<h2>Webserver with Private IP: $MYIP</h2>" > /var/www/html/index.html
-
-systemctl start apache2
-systemctl enable apache2
-EOF
+  user_data = file("user_data.sh")
 
   tags = {
     Name = "MyUbuntu Lab2"
@@ -62,7 +51,7 @@ EOF
 resource "aws_security_group" "web" {
   name        = "web-server"
   description = "SG for my WebServer"
-  vpc_id      = "CHANGE_TO_YOUR_DEFAULT_VPC"
+  vpc_id      = "vpc-079e41a32a1027033"
 
   ingress {
     description = "Allow HTTP"
