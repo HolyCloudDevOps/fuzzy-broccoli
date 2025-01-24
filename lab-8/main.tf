@@ -39,6 +39,9 @@ data "aws_vpc" "default" {
   default = true
 }
 
+data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
+
 resource "aws_instance" "web" {
   count         = 2
   ami           = data.aws_ami.ubuntu.id
@@ -115,4 +118,16 @@ output "instance_ips_and_ids_no_idx" {
 
 output "vpc_id" {
   value = data.aws_vpc.default.id
+}
+
+output "region_name" {
+  value = data.aws_region.current.name
+}
+
+output "region_description" {
+  value = data.aws_region.current.description
+}
+
+output "account_id" {
+  value = data.aws_caller_identity.current.account_id
 }
