@@ -90,7 +90,6 @@ resource "aws_security_group" "web" {
   }
 }
 
-
 output "instance_ips_and_ids" {
   value = {
     for idx, instance in aws_instance.web : idx => {
@@ -108,3 +107,4 @@ output "instance_ips_and_ids_no_idx" {
     }
   ]
 }
+
