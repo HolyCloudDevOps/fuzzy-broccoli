@@ -35,6 +35,10 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
+data "aws_vpc" "default" {
+  default = true
+}
+
 resource "aws_instance" "web" {
   count         = 2
   ami           = data.aws_ami.ubuntu.id
@@ -64,7 +68,7 @@ resource "aws_eip" "lb" {
 resource "aws_security_group" "web" {
   name        = "new-web-server"
   description = "SG for my WebServer"
-  vpc_id      = "CHANGE_TO_YOUR_DEFAULT_VPC"
+  vpc_id      = data.aws_vpc.default.id
 
   dynamic "ingress" {
     for_each = ["80", "8080", "443", "500"]
@@ -90,6 +94,7 @@ resource "aws_security_group" "web" {
   }
 }
 
+
 output "instance_ips_and_ids" {
   value = {
     for idx, instance in aws_instance.web : idx => {
@@ -108,3 +113,6 @@ output "instance_ips_and_ids_no_idx" {
   ]
 }
 
+output "vpc_id" {
+  value = data.aws_vpc.default.id
+}
