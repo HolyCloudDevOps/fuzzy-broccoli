@@ -1,0 +1,103 @@
+### **1. Отримання інформації про існуючий VPC**
+data "aws_vpc" "default" {
+  default = true
+}
+
+output "vpc_id" {
+  value = data.aws_vpc.default.id
+}
+
+### **2. Отримання існуючого Security Group**
+data "aws_security_group" "web_sg" {
+  filter {
+    name   = "group-name"
+    values = ["my-existing-sg"]
+  }
+}
+
+output "security_group_id" {
+  value = data.aws_security_group.web_sg.id
+}
+
+### **3. Отримання останнього доступного AMI**
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+
+  owners = ["137112412989"] # Amazon
+}
+
+output "ami_id" {
+  value = data.aws_ami.amazon_linux.id
+}
+
+### **4. Отримання даних про існуючу роль IAM**
+data "aws_iam_role" "example" {
+  name = "existing-iam-role-name"
+}
+
+output "role_arn" {
+  value = data.aws_iam_role.example.arn
+}
+
+### **5. Отримання існуючого ключа KMS**
+data "aws_kms_key" "example" {
+  key_id = "alias/my-key-alias"
+}
+
+output "kms_key_arn" {
+  value = data.aws_kms_key.example.arn
+}
+
+### **6. Отримання існуючої підмережі**
+data "aws_subnet" "example" {
+  filter {
+    name   = "tag:Name"
+    values = ["my-subnet"]
+  }
+}
+
+output "subnet_id" {
+  value = data.aws_subnet.example.id
+}
+
+### **7. Використання існуючих тегів**
+data "aws_instance" "example" {
+  filter {
+    name   = "tag:Name"
+    values = ["web-server"]
+  }
+}
+
+output "instance_id" {
+  value = data.aws_instance.example.id
+}
+
+### **8. Отримання даних про існуючий об’єкт S3**
+data "aws_s3_bucket" "example" {
+  bucket = "my-existing-bucket"
+}
+
+output "bucket_arn" {
+  value = data.aws_s3_bucket.example.arn
+}
+
+### **9. Пошук Availability Zones**
+data "aws_availability_zones" "available" {}
+
+output "zones" {
+  value = data.aws_availability_zones.available.names
+}
+
+### **10. Отримання Elastic IP**
+data "aws_eip" "example" {
+  public_ip = "203.0.113.25"
+}
+
+output "eip_allocation_id" {
+  value = data.aws_eip.example.allocation_id
+}
