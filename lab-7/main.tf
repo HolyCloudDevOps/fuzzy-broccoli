@@ -35,51 +35,12 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-
 resource "aws_instance" "web" {
-  count         = 1
+  count         = 2
   ami           = data.aws_ami.ubuntu.id
-  instance_type = "t2.micro"
-  vpc_security_group_ids = [aws_security_group.forall.id]
-  user_data = file("user_data.sh")
+  instance_type = "t3.micro"
+  vpc_security_group_ids = [aws_security_group.web.id]
 
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  depends_on = [ aws_instance.app, aws_instance.db ]
-
-  tags = {
-    Name = "lab-7-${count.index}-${timestamp()}"
-  }
-  
-}
-
-
-resource "aws_instance" "app" {
-  count         = 1
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = "t2.micro"
-  vpc_security_group_ids = [aws_security_group.forall.id]
-  user_data = file("user_data.sh")
-
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  depends_on = [ aws_instance.db ]
-
-  tags = {
-    Name = "lab-7-${count.index}-${timestamp()}"
-  }
-  
-}
-
-resource "aws_instance" "db" {
-  count         = 1
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = "t2.micro"
-  vpc_security_group_ids = [aws_security_group.forall.id]
   user_data = file("user_data.sh")
 
   lifecycle {
@@ -87,15 +48,24 @@ resource "aws_instance" "db" {
   }
 
   tags = {
-    Name = "lab-7-${count.index}-${timestamp()}"
+    Name = "MyUbuntublueLab6-${count.index}-${timestamp()}"
   }
   
 }
 
-resource "aws_security_group" "forall" {
+resource "aws_eip" "lb" {
+  count    = length(aws_instance.web)
+  instance = aws_instance.web[count.index].id
+  
+  tags = {
+    Name = "IP for WebServer"
+  }
+}
+
+resource "aws_security_group" "web" {
   name        = "new-web-server"
   description = "SG for my WebServer"
-  //vpc_id      = "CHANGE_TO_YOUR_DEFAULT_VPC"
+  vpc_id      = "CHANGE_TO_YOUR_DEFAULT_VPC"
 
   dynamic "ingress" {
     for_each = ["80", "8080", "443", "500"]
@@ -120,3 +90,22 @@ resource "aws_security_group" "forall" {
     Name = "WebServer"
   }
 }
+
+output "instance_ips_and_ids" {
+  value = {
+    for idx, instance in aws_instance.web : idx => {
+      private_ip = instance.private_ip
+      id         = instance.id
+    }
+  }
+}
+
+output "instance_ips_and_ids_no_idx" {
+  value = [
+    for instance in aws_instance.web : {
+      private_ip = instance.private_ip
+      id         = instance.id
+    }
+  ]
+}
+
